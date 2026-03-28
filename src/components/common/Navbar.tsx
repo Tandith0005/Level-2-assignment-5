@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X, CalendarDays, Bell, LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
+import { Menu, X, Bell, LogOut, LayoutDashboard, ChevronDown, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/src/hooks/useAuth";
 import Image from "next/image";
 
 export default function Navbar() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isPending, logout } = useAuth();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -31,6 +31,27 @@ export default function Navbar() {
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+  // Show Loading Spinner while checking auth
+  if (isPending) {
+    return (
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0f]/90 backdrop-blur-md border-b border-white/5 h-20">
+        <div className="container mx-auto px-4 h-full flex items-center justify-between">
+          {/* Logo Placeholder */}
+          <div className="flex items-center gap-2">
+             <div className="w-10 h-10 rounded-lg bg-white/5 animate-pulse" />
+             <div className="h-4 w-24 bg-white/5 rounded animate-pulse" />
+          </div>
+          
+          {/* Loading Spinner */}
+          <div className="flex items-center gap-2 text-zinc-400">
+            <span className="text-sm">Loading...</span>
+            <Loader2 className="w-4 h-4 animate-spin" />
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0f]/90 backdrop-blur-md border-b border-white/5">

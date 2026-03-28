@@ -43,10 +43,10 @@ export default function LoginPage() {
       const response = await loginUser(data);
       
       // Backend returns: { success: true, data: { user, accessToken } }
-      const { user, accessToken } = response.data;
+      const { user } = response.data;
 
       // Update global auth state (sets cookie/localStorage and redirects)
-      login(user, accessToken);
+      login(user);
       
       toast.success("Welcome back!");
 
