@@ -7,61 +7,56 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CalendarDays, Eye, EyeOff, Loader2, MailCheck, AlertCircle } from "lucide-react";
+import { CalendarDays, Eye, EyeOff, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
-import { useAuth } from "@/src/hooks/useAuth";
-import { loginUser } from "@/src/services/auth.service";
+import { registerUser } from "@/src/services/auth.service";
 
 // Validation Schema
-const loginSchema = z.object({
+const registerSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Please confirm your password"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+type RegisterFormData = z.infer<typeof registerSchema>;
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
-  const { login } = useAuth(); // Uses our custom context hook
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [needsVerification, setNeedsVerification] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: RegisterFormData) => {
     setIsSubmitting(true);
-    setNeedsVerification(false); // Reset state
-
     try {
-      const response = await loginUser(data);
-      
-      // Backend returns: { success: true, data: { user, accessToken } }
-      const { user, accessToken } = response.data;
+      // Call API to register user
+      await registerUser({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      });
 
-      // Update global auth state (sets cookie/localStorage and redirects)
-      login(user, accessToken);
+      toast.success("Registration successful! Please check your email to verify.");
       
-      toast.success("Welcome back!");
+      // Redirect to login after short delay
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
 
     } catch (error: any) {
-      console.log(error);
-      const errorMessage = error.response?.data?.message || "Login failed. Please check your credentials.";
-      
-      // Check for specific "not verified" message from backend
-      // Adjust the string match based on your exact backend error message
-      if (errorMessage.toLowerCase().includes("verify") || errorMessage.toLowerCase().includes("verified")) {
-        setNeedsVerification(true);
-        toast.error("Email not verified. Please check your inbox.");
-      } else {
-        toast.error(errorMessage);
-      }
+      const message = error.response?.data?.message || "Registration failed. Try again.";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -69,43 +64,35 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f] px-4 pt-16">
-      <div className="w-full max-w-md bg-[#111118] border border-white/10 rounded-2xl shadow-2xl shadow-black/50 p-8 relative overflow-hidden">
-        {/* Background Glow */}
-        <div className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full bg-violet-600/10 blur-[120px]" />   
+      <div className="w-full max-w-md bg-[#111118] border border-white/10 rounded-2xl shadow-2xl shadow-black/50 p-8">
+      <div className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full bg-violet-600/10 blur-[120px]" />   
         
         {/* Header */}
-        <div className="text-center mb-8 relative z-10">
+        <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 mb-4 shadow-lg shadow-violet-500/20">
             <CalendarDays className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">Create Account</h1>
           <p className="text-zinc-400 text-sm">
-            Sign in to continue to Planora
+            Join Planora to start creating and joining events
           </p>
         </div>
 
-        {/* Verification Warning Card */}
-        {needsVerification && (
-          <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3 relative z-10 animate-in fade-in slide-in-from-top-2">
-            <MailCheck className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-            <div>
-              <h3 className="text-sm font-semibold text-blue-400 mb-1">Verification Required</h3>
-              <p className="text-xs text-blue-300/80 leading-relaxed">
-                Your account exists but hasn't been verified yet. Please check your email inbox (and spam folder) for the verification link sent during registration.
-              </p>
-              <Link 
-                href="/register" 
-                className="text-xs text-blue-400 hover:text-blue-300 underline mt-2 inline-block"
-              >
-                Didn't receive email? Register again
-              </Link>
-            </div>
-          </div>
-        )}
-
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 relative z-10">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           
+          {/* Name Field */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Full Name</label>
+            <input
+              {...register("name")}
+              type="text"
+              placeholder="John Doe"
+              className={`w-full bg-[#0a0a0f] border ${errors.name ? 'border-red-500/50' : 'border-white/10'} rounded-lg px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500 transition-colors`}
+            />
+            {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>}
+          </div>
+
           {/* Email Field */}
           <div className="space-y-1">
             <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Email Address</label>
@@ -139,6 +126,18 @@ export default function LoginPage() {
             {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>}
           </div>
 
+          {/* Confirm Password Field */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Confirm Password</label>
+            <input
+              {...register("confirmPassword")}
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              className={`w-full bg-[#0a0a0f] border ${errors.confirmPassword ? 'border-red-500/50' : 'border-white/10'} rounded-lg px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500 transition-colors`}
+            />
+            {errors.confirmPassword && <p className="text-red-400 text-xs mt-1">{errors.confirmPassword.message}</p>}
+          </div>
+
           {/* Submit Button */}
           <button
             type="submit"
@@ -148,20 +147,20 @@ export default function LoginPage() {
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Signing In...
+                Creating Account...
               </>
             ) : (
-              "Sign In"
+              "Sign Up"
             )}
           </button>
         </form>
 
         {/* Footer */}
-        <div className="mt-6 text-center relative z-10">
+        <div className="mt-6 text-center">
           <p className="text-zinc-400 text-sm">
-            Don't have an account?{" "}
-            <Link href="/register" className="text-violet-400 hover:text-violet-300 font-medium transition-colors">
-              Sign Up
+            Already have an account?{" "}
+            <Link href="/login" className="text-violet-400 hover:text-violet-300 font-medium transition-colors">
+              Sign In
             </Link>
           </p>
         </div>

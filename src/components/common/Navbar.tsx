@@ -1,19 +1,19 @@
 "use client";
- 
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-
 import { Menu, X, CalendarDays, Bell, LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/src/hooks/useAuth";
- 
+import Image from "next/image";
+
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
- 
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -22,29 +22,30 @@ export default function Navbar() {
       toast.error("Failed to logout");
     }
   };
- 
+
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/events", label: "Events" },
+    { href: "/dashboard", label: "Dashboard" },
   ];
- 
+
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
- 
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0f]/90 backdrop-blur-md border-b border-white/5">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20 group-hover:shadow-violet-500/40 transition-all duration-300">
-              <CalendarDays className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-white font-bold text-xl tracking-tight">
-              Plan<span className="text-violet-400">ora</span>
-            </span>
+            <Image
+              src="/Planora.jpg"
+              alt="Planora Logo"
+              width={162}
+              height={102}
+            />
           </Link>
- 
+
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
@@ -61,19 +62,19 @@ export default function Navbar() {
               </Link>
             ))}
           </nav>
- 
+
           {/* Right side */}
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated && user ? (
               <>
-                {/* Notifications bell placeholder */}
+                {/* Notifications */}
                 <Link
                   href="/dashboard"
                   className="w-9 h-9 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
                 >
                   <Bell className="w-4 h-4" />
                 </Link>
- 
+
                 {/* User dropdown */}
                 <div className="relative">
                   <button
@@ -81,14 +82,14 @@ export default function Navbar() {
                     className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all group"
                   >
                     <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
-                      {user.name.charAt(0).toUpperCase()}
+                      {user.name ? user.name.charAt(0).toUpperCase() : "U"}
                     </div>
                     <span className="text-sm text-zinc-300 group-hover:text-white transition-colors max-w-[100px] truncate">
-                      {user.name}
+                      {user.name || "User"}
                     </span>
                     <ChevronDown className={`w-3 h-3 text-zinc-500 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
                   </button>
- 
+
                   {dropdownOpen && (
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
@@ -139,7 +140,7 @@ export default function Navbar() {
               </>
             )}
           </div>
- 
+
           {/* Mobile burger */}
           <button
             className="md:hidden w-9 h-9 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
@@ -149,7 +150,7 @@ export default function Navbar() {
           </button>
         </div>
       </div>
- 
+
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden bg-[#0a0a0f] border-t border-white/5 px-4 pb-4 pt-2">
@@ -169,7 +170,7 @@ export default function Navbar() {
               </Link>
             ))}
           </nav>
- 
+
           {isAuthenticated && user ? (
             <div className="border-t border-white/5 pt-4 flex flex-col gap-2">
               <Link

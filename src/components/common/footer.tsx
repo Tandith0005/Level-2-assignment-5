@@ -1,23 +1,25 @@
 import Link from "next/link";
 import { CalendarDays } from "lucide-react";
+import Image from "next/image";
 
 export default function Footer() {
   return (
     <footer className="bg-[#0a0a0f] border-t border-white/5 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4 group w-fit">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-                <CalendarDays className="w-4 h-4 text-white" />
-              </div>
-              <span className="text-white font-bold text-xl tracking-tight">
-                Plan<span className="text-violet-400">ora</span>
-              </span>
+              <Image
+                src="/Planora.jpg"
+                alt="Planora Logo"
+                width={162}
+                height={102}
+              />
             </Link>
             <p className="text-zinc-500 text-sm leading-relaxed max-w-xs">
-              Create, manage and join events seamlessly. From intimate private gatherings to large public conferences.
+              Create, manage and join events seamlessly. From intimate private
+              gatherings to large public conferences.
             </p>
             {/* <div className="flex items-center gap-3 mt-5">
               <a
