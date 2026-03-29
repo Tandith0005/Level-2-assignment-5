@@ -2,13 +2,17 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { eventService } from "@/services/event.service";
-import { EventQuery, EventType } from "@/types";
-import EventCard from "@/components/event/EventCard";
 import { Globe, Lock, Tag, Ticket, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { getAllEvents } from "@/src/services/event.service";
+import { Event } from "@/src/types";
+import EventCard from "../event/EventCard";
 
-type CategoryKey = "public-free" | "public-paid" | "private-free" | "private-paid";
+type CategoryKey =
+  | "public-free"
+  | "public-paid"
+  | "private-free"
+  | "private-paid";
 
 interface Category {
   key: CategoryKey;
@@ -18,7 +22,7 @@ interface Category {
   color: string;
   iconColor: string;
   borderColor: string;
-  query: Partial<EventQuery>;
+  query: { type: "PUBLIC" | "PRIVATE"; minFee?: number; maxFee?: number };
 }
 
 const CATEGORIES: Category[] = [
@@ -27,8 +31,8 @@ const CATEGORIES: Category[] = [
     label: "Public Free",
     description: "Open to all — no cost, instant join",
     icon: Globe,
-    color: "bg-violet-500/10",
-    iconColor: "text-violet-400",
+    color: "bg-emerald-500/10",
+    iconColor: "text-emerald-400",
     borderColor: "border-violet-500/30",
     query: { type: "PUBLIC", maxFee: 0 },
   },
@@ -37,8 +41,8 @@ const CATEGORIES: Category[] = [
     label: "Public Paid",
     description: "Open events with registration fee",
     icon: Ticket,
-    color: "bg-emerald-500/10",
-    iconColor: "text-emerald-400",
+    color: "bg-violet-500/10",
+    iconColor: "text-violet-400",
     borderColor: "border-emerald-500/30",
     query: { type: "PUBLIC", minFee: 1 },
   },
@@ -83,7 +87,9 @@ function CategoryTab({
           : "bg-white/3 text-zinc-500 border-white/5 hover:bg-white/5 hover:text-zinc-300"
       }`}
     >
-      <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? category.iconColor : "text-zinc-600 group-hover:text-zinc-400"}`} />
+      <Icon
+        className={`w-4 h-4 flex-shrink-0 ${isActive ? category.iconColor : "text-zinc-600 group-hover:text-zinc-400"}`}
+      />
       <span className="whitespace-nowrap">{category.label}</span>
     </button>
   );
@@ -96,7 +102,7 @@ export default function EventCategoriesSection() {
   const { data, isLoading } = useQuery({
     queryKey: ["category-events", activeKey],
     queryFn: () =>
-      eventService.getAll({
+      getAllEvents({
         ...activeCategory.query,
         sortBy: "date",
         sortOrder: "asc",
@@ -106,11 +112,16 @@ export default function EventCategoriesSection() {
     staleTime: 1000 * 60 * 2,
   });
 
-  const events = data?.data || [];
+  const events = data?.data?.data || [];
   const total = data?.meta?.total || 0;
 
   return (
     <section className="py-24 bg-[#07070e] relative overflow-hidden">
+      {/* Background gradient */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="absolute -bottom-40 -right-40 w-[700px] h-[700px] rounded-full bg-violet-600/10 blur-[120px]" />
+      </div>
       {/* Section separator */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
@@ -151,13 +162,19 @@ export default function EventCategoriesSection() {
         </div>
 
         {/* Active category descriptor */}
-        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl ${activeCategory.color} border ${activeCategory.borderColor} mb-8`}>
-          <activeCategory.icon className={`w-3.5 h-3.5 ${activeCategory.iconColor}`} />
+        <div
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl ${activeCategory.color} border ${activeCategory.borderColor} mb-8`}
+        >
+          <activeCategory.icon
+            className={`w-3.5 h-3.5 ${activeCategory.iconColor}`}
+          />
           <span className={`text-xs font-medium ${activeCategory.iconColor}`}>
             {activeCategory.description}
           </span>
           {!isLoading && (
-            <span className="text-xs text-zinc-600 ml-1">— {total} event{total !== 1 ? "s" : ""}</span>
+            <span className="text-xs text-zinc-600 ml-1">
+              — {total} event{total !== 1 ? "s" : ""}
+            </span>
           )}
         </div>
 
@@ -179,17 +196,26 @@ export default function EventCategoriesSection() {
           </div>
         ) : events.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {events.map((event) => (
+            {events.map((event: Event) => (
               <EventCard key={event.id} event={event} />
             ))}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className={`w-14 h-14 rounded-2xl ${activeCategory.color} border ${activeCategory.borderColor} flex items-center justify-center mb-4`}>
-              <activeCategory.icon className={`w-6 h-6 ${activeCategory.iconColor}`} />
+            <div
+              className={`w-14 h-14 rounded-2xl ${activeCategory.color} border ${activeCategory.borderColor} flex items-center justify-center mb-4`}
+            >
+              <activeCategory.icon
+                className={`w-6 h-6 ${activeCategory.iconColor}`}
+              />
             </div>
-            <p className="text-white font-semibold mb-1">No events in this category</p>
-            <p className="text-zinc-600 text-sm">Be the first to create a {activeCategory.label.toLowerCase()} event.</p>
+            <p className="text-white font-semibold mb-1">
+              No events in this category
+            </p>
+            <p className="text-zinc-600 text-sm">
+              Be the first to create a {activeCategory.label.toLowerCase()}{" "}
+              event.
+            </p>
           </div>
         )}
       </div>

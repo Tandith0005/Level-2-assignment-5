@@ -101,7 +101,6 @@ export default function UpcomingEventsSlider() {
         page: 1,
       }),
   });
-  console.log(data?.data);
 
   const events = data?.data?.data || [];
 
@@ -113,10 +112,10 @@ export default function UpcomingEventsSlider() {
 
   return (
     <section className="py-24 bg-[#0a0a0f] relative overflow-hidden">
-      {/* Radial glow top-left */}
-        <div className="absolute top-auth left-auth w-[700px] h-[700px] rounded-full bg-violet-600/10 blur-[120px]" />
-      {/* Subtle section glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-px bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="absolute -bottom-40 -right-40 w-[700px] h-[700px] rounded-full bg-violet-600/10 blur-[120px]" />
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -159,7 +158,7 @@ export default function UpcomingEventsSlider() {
           {isLoading ? (
             Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
           ) : events.length > 0 ? (
-            events.map((event : any) => (
+            events.map((event: any) => (
               <div key={event.id} className="snap-start">
                 <SliderCard event={event} />
               </div>

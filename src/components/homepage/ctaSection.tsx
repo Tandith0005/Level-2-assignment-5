@@ -1,12 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Plus, Users, Zap, Shield, Globe } from "lucide-react";
 
-const STATS = [
-  { value: "100+", label: "Events Created" },
-  { value: "500+", label: "Participants" },
-  { value: "50+", label: "Organizers" },
-  { value: "4.8★", label: "Avg Rating" },
-];
 
 const FEATURES = [
   {
@@ -37,22 +31,6 @@ export default function CTASection() {
       <div className="absolute top-0 left-0 w-[400px] h-[400px] rounded-full bg-indigo-600/5 blur-[100px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Stats row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-20">
-          {STATS.map((stat) => (
-            <div
-              key={stat.label}
-              className="text-center p-5 rounded-2xl bg-white/[0.02] border border-white/5"
-            >
-              <p className="text-3xl font-black text-white mb-1 tracking-tight">
-                {stat.value}
-              </p>
-              <p className="text-xs text-zinc-600 font-medium uppercase tracking-wider">
-                {stat.label}
-              </p>
-            </div>
-          ))}
-        </div>
 
         {/* Main CTA block */}
         <div className="relative rounded-3xl overflow-hidden border border-white/8">
