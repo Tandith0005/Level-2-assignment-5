@@ -31,7 +31,6 @@ import { formatDate } from "@/src/utils/formatDate";
 import { joinEvent } from "@/src/services/participant.service";
 import { createCheckoutSession } from "@/src/services/payment.service";
 
-
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function EventDetailsPage() {
   const params = useParams();
@@ -40,11 +39,17 @@ export default function EventDetailsPage() {
   const { user, isAuthenticated } = useAuth();
 
   // "idle" | "joined" (pending payment) | "redirecting"
-  const [paymentStep, setPaymentStep] = useState<"idle" | "joined" | "redirecting">("idle");
+  const [paymentStep, setPaymentStep] = useState<
+    "idle" | "joined" | "redirecting"
+  >("idle");
 
   const eventId = params.id as string;
 
-  const { data: event, isLoading, error } = useQuery({
+  const {
+    data: event,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["event", eventId],
     queryFn: () => getSingleEvent(eventId),
   });
@@ -55,7 +60,9 @@ export default function EventDetailsPage() {
     onSuccess: (data) => {
       if (data.requiresPayment) {
         setPaymentStep("joined");
-        toast("Spot reserved! Complete payment to confirm your seat.", { icon: "🎟️" });
+        toast("Spot reserved! Complete payment to confirm your seat.", {
+          icon: "🎟️",
+        });
       } else {
         toast.success("Successfully joined the event! 🎉");
         queryClient.invalidateQueries({ queryKey: ["event", eventId] });
@@ -76,10 +83,29 @@ export default function EventDetailsPage() {
       }
     },
     onError: (err: any) => {
-      toast.error(err.response?.data?.message || "Failed to create checkout session");
+      toast.error(
+        err.response?.data?.message || "Failed to create checkout session",
+      );
       setPaymentStep("joined"); // stay on the proceed button
     },
   });
+
+  const handleMainAction = () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to join this event");
+      router.push(`/login?redirect=/events/${eventId}`);
+      return;
+    }
+
+    if (
+      actionConfig.action === "completePayment" ||
+      actionConfig.action === "payAndJoin"
+    ) {
+      checkoutMutation.mutate();
+    } else if (actionConfig.action === "joinFree") {
+      joinMutation.mutate();
+    }
+  };
 
   // ── Loading / Error states ──────────────────────────────────────────────────
   if (isLoading) {
@@ -89,7 +115,9 @@ export default function EventDetailsPage() {
           <div className="w-16 h-16 border-4 border-violet-500/20 border-t-violet-500 rounded-full animate-spin" />
           <Sparkles className="w-6 h-6 text-violet-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
         </div>
-        <p className="text-violet-400 mt-4 animate-pulse">Loading amazing event details...</p>
+        <p className="text-violet-400 mt-4 animate-pulse">
+          Loading amazing event details...
+        </p>
       </div>
     );
   }
@@ -103,7 +131,8 @@ export default function EventDetailsPage() {
         </div>
         <h2 className="text-3xl font-bold text-white mb-2">Event Not Found</h2>
         <p className="text-zinc-400 mb-6">
-          The event you&apos;re looking for doesn&apos;t exist or has been removed.
+          The event you&apos;re looking for doesn&apos;t exist or has been
+          removed.
         </p>
         <Link
           href="/events"
@@ -119,14 +148,40 @@ export default function EventDetailsPage() {
   const eventData = event.data || event;
   const isOwner = user?.id === eventData.creatorId;
 
+  // Check if user has a pending payment for this event
+  const hasPendingPayment = eventData?.participants?.some(
+    (p: any) => p.userId === user?.id && !p.isPaid && p.status === "PENDING",
+  );
+
   // ── Action config ───────────────────────────────────────────────────────────
   const getActionConfig = () => {
     if (isOwner) {
-      return { label: "You're the Organizer", disabled: true, type: "neutral", icon: User };
+      return {
+        label: "You're the Organizer",
+        disabled: true,
+        type: "neutral",
+        icon: User,
+      };
     }
+    // Highest priority: Has pending payment → allow retry
+  if (hasPendingPayment) {
+    return {
+      label: "Complete Payment",
+      disabled: false,
+      type: "primary" as const,
+      icon: CreditCard,
+      action: "completePayment" as const,
+    };
+  }
     if (eventData.type === "PRIVATE") {
-      return { label: "Invitation Only", disabled: true, type: "neutral", icon: Lock };
+      return {
+        label: "Invitation Only",
+        disabled: true,
+        type: "neutral",
+        icon: Lock,
+      };
     }
+    
     if (eventData.registrationFee > 0) {
       return {
         label: `Pay $${eventData.registrationFee} & Join`,
@@ -135,7 +190,12 @@ export default function EventDetailsPage() {
         icon: DollarSign,
       };
     }
-    return { label: "Join Event — It's Free! 🎉", disabled: false, type: "success", icon: CheckCircle };
+    return {
+      label: "Join Event — It's Free!!",
+      disabled: false,
+      type: "success",
+      icon: CheckCircle,
+    };
   };
 
   const actionConfig = getActionConfig();
@@ -150,7 +210,8 @@ export default function EventDetailsPage() {
   };
 
   const isJoining = joinMutation.isPending;
-  const isCheckingOut = checkoutMutation.isPending || paymentStep === "redirecting";
+  const isCheckingOut =
+    checkoutMutation.isPending || paymentStep === "redirecting";
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -161,19 +222,19 @@ export default function EventDetailsPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 relative z-10">
         {/* Main Card */}
         <div className="bg-[#111118]/90 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-
           {/* ── Header ── */}
           <div className="p-6 sm:p-8 border-b border-white/5">
             <div className="flex flex-wrap items-start justify-between gap-6">
-
               {/* Left: meta + title */}
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-3 mb-4">
-                  <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
-                    eventData.type === "PUBLIC"
-                      ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                      : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                  }`}>
+                  <span
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
+                      eventData.type === "PUBLIC"
+                        ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                        : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                    }`}
+                  >
                     <Globe className="w-3 h-3 inline mr-1" />
                     {eventData.type}
                   </span>
@@ -216,89 +277,63 @@ export default function EventDetailsPage() {
 
               {/* Right: CTA */}
               <div className="w-full md:w-auto flex flex-col items-center gap-3">
-
-                {/* ── STEP 1: initial join button ── */}
-                {paymentStep === "idle" && (
-                  <button
-                    onClick={handleJoinClick}
-                    disabled={actionConfig.disabled || isJoining}
-                    className={`group relative w-full md:w-auto px-8 py-4 rounded-xl font-bold text-white transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-2xl flex items-center justify-center gap-2 overflow-hidden ${
-                      actionConfig.type === "success"
-                        ? "bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 shadow-emerald-500/30"
-                        : actionConfig.type === "primary"
+                {/* Main Action Button */}
+                <button
+                  onClick={handleMainAction}
+                  disabled={
+                    actionConfig.disabled ||
+                    joinMutation.isPending ||
+                    checkoutMutation.isPending ||
+                    paymentStep === "redirecting"
+                  }
+                  className={`group relative w-full md:w-auto px-10 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-2xl flex items-center justify-center gap-3 overflow-hidden ${
+                    actionConfig.type === "success"
+                      ? "bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 shadow-emerald-500/30"
+                      : actionConfig.type === "primary"
                         ? "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 shadow-violet-500/30"
                         : "bg-zinc-700 cursor-not-allowed opacity-70"
-                    }`}
-                  >
-                    {isJoining ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Reserving spot...
-                      </>
-                    ) : (
-                      <>
-                        {actionConfig.icon && (
-                          <actionConfig.icon className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                        )}
-                        {actionConfig.label}
-                      </>
-                    )}
-                  </button>
-                )}
-
-                {/* ── STEP 2: spot reserved — proceed to payment ── */}
-                {paymentStep === "joined" && (
-                  <div className="w-full md:w-auto flex flex-col items-center gap-3">
-                    {/* Confirmation pill */}
-                    <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-                      <CheckCircle className="w-4 h-4 text-emerald-400" />
-                      <span className="text-xs font-semibold text-emerald-400">Spot reserved!</span>
-                    </div>
-
-                    {/* Proceed to payment */}
-                    <button
-                      onClick={() => checkoutMutation.mutate()}
-                      disabled={isCheckingOut}
-                      className="group w-full md:w-auto px-8 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 shadow-2xl shadow-violet-500/30 transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
-                    >
-                      {isCheckingOut ? (
-                        <>
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          Redirecting to Stripe...
-                        </>
-                      ) : (
-                        <>
-                          <CreditCard className="w-5 h-5" />
-                          Proceed to Payment
-                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </>
+                  }`}
+                >
+                  {joinMutation.isPending ||
+                  checkoutMutation.isPending ||
+                  paymentStep === "redirecting" ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      {actionConfig.icon && (
+                        <actionConfig.icon className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                       )}
-                    </button>
+                      {actionConfig.label}
+                    </>
+                  )}
+                </button>
 
-                    <p className="text-xs text-zinc-600 text-center max-w-[200px]">
-                      Your spot is held for this session. Complete payment to confirm.
+                {/* Payment Retry / Pending Hint */}
+                {hasPendingPayment && paymentStep === "idle" && (
+                  <div className="text-center">
+                    <p className="text-amber-400 text-sm mt-2 max-w-[280px]">
+                      You have a pending payment for this event.
+                    </p>
+                    <p className="text-amber-300/70 text-xs mt-1">
+                      Click &quot;Complete Payment&quot; to finish your
+                      registration.
                     </p>
                   </div>
                 )}
 
-                {/* ── STEP 3: redirecting indicator ── */}
-                {paymentStep === "redirecting" && (
-                  <div className="flex flex-col items-center gap-3 py-2">
-                    <Loader2 className="w-8 h-8 text-violet-400 animate-spin" />
-                    <p className="text-sm text-zinc-400">Taking you to Stripe...</p>
-                  </div>
-                )}
-
                 {/* Sub-label */}
-                {paymentStep === "idle" && (
+                {paymentStep === "idle" && !hasPendingPayment && (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse" />
                     <p className="text-xs text-zinc-500">
                       {eventData.type === "PRIVATE"
                         ? "🔒 Invitation only"
                         : eventData.registrationFee > 0
-                        ? "💳 Secure payment via Stripe"
-                        : "✅ Instant confirmation"}
+                          ? "💳 Secure payment via Stripe"
+                          : "✅ Instant confirmation"}
                     </p>
                   </div>
                 )}
@@ -308,7 +343,6 @@ export default function EventDetailsPage() {
 
           {/* ── Content Grid ── */}
           <div className="grid grid-cols-1 lg:grid-cols-3">
-
             {/* Left: Description */}
             <div className="lg:col-span-2 p-6 sm:p-8 border-r border-white/5">
               <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
@@ -339,17 +373,28 @@ export default function EventDetailsPage() {
                     icon: MapPin,
                     label: "Location",
                     main: eventData.venue,
-                    sub: <span className="text-xs text-violet-400 cursor-pointer hover:underline">Get Directions →</span>,
+                    sub: (
+                      <span className="text-xs text-violet-400 cursor-pointer hover:underline">
+                        Get Directions →
+                      </span>
+                    ),
                   },
                   {
                     icon: DollarSign,
                     label: "Price",
                     main: (
-                      <span className={`text-2xl font-bold ${eventData.registrationFee === 0 ? "text-emerald-400" : "text-violet-400"}`}>
-                        {eventData.registrationFee === 0 ? "FREE" : `$${eventData.registrationFee}`}
+                      <span
+                        className={`text-2xl font-bold ${eventData.registrationFee === 0 ? "text-emerald-400" : "text-violet-400"}`}
+                      >
+                        {eventData.registrationFee === 0
+                          ? "FREE"
+                          : `$${eventData.registrationFee}`}
                       </span>
                     ),
-                    sub: eventData.registrationFee > 0 ? "+ applicable fees" : null,
+                    sub:
+                      eventData.registrationFee > 0
+                        ? "+ applicable fees"
+                        : null,
                   },
                   {
                     icon: User,
@@ -358,13 +403,18 @@ export default function EventDetailsPage() {
                     sub: eventData.creator?.email,
                   },
                 ].map(({ icon: Icon, label, main, sub }) => (
-                  <div key={label} className="group p-4 rounded-xl hover:bg-white/5 transition-all">
+                  <div
+                    key={label}
+                    className="group p-4 rounded-xl hover:bg-white/5 transition-all"
+                  >
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                         <Icon className="w-5 h-5 text-violet-400" />
                       </div>
                       <div>
-                        <p className="text-xs text-zinc-500 uppercase font-semibold tracking-wider">{label}</p>
+                        <p className="text-xs text-zinc-500 uppercase font-semibold tracking-wider">
+                          {label}
+                        </p>
                         <p className="text-white font-medium">{main}</p>
                         {sub && <p className="text-xs text-zinc-500">{sub}</p>}
                       </div>
@@ -379,9 +429,12 @@ export default function EventDetailsPage() {
                   <div className="flex items-start gap-3">
                     <Lock className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-amber-400">Private Event</p>
+                      <p className="text-sm font-semibold text-amber-400">
+                        Private Event
+                      </p>
                       <p className="text-xs text-amber-200/70 mt-1">
-                        This event is invite-only. Your request will be reviewed by the organizer within 24 hours.
+                        This event is invite-only. Your request will be reviewed
+                        by the organizer within 24 hours.
                       </p>
                     </div>
                   </div>
