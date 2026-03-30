@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Footer from "../components/common/footer";
 import { Toaster } from "react-hot-toast";
 import { QueryProvider } from "../providers/QueryProvider";
 
@@ -34,7 +33,6 @@ export default function RootLayout({
         <QueryProvider>
           <Toaster />
           {children}
-          <Footer />
         </QueryProvider>
       </body>
     </html>

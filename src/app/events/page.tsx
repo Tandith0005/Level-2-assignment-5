@@ -7,6 +7,7 @@ import { CalendarDays, Filter, Search, X } from 'lucide-react'; // Added X icon 
 import { getAllEvents } from '@/src/services/event.service';
 import EventCard from '@/src/components/event/EventCard';
 import Navbar from '@/src/components/common/Navbar';
+import Footer from '@/src/components/common/footer';
 
 function EventContent() {
   const searchParams = useSearchParams();
@@ -125,7 +126,7 @@ function EventContent() {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <div className="text-red-500 bg-red-500/10 px-6 py-4 rounded-lg border border-red-500/20">
-          Error: {error}
+          Error: Something went wrong, Please refresh or try again later
         </div>
       </div>
     );
@@ -297,6 +298,7 @@ export default function EventPage() {
     }>
       <Navbar />
       <EventContent />
+      <Footer />
     </Suspense>
   );
 }

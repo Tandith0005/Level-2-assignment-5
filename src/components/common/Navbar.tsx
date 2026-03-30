@@ -8,15 +8,14 @@ import { Menu, X, Bell, LogOut, LayoutDashboard, ChevronDown, Loader2 } from "lu
 import toast from "react-hot-toast";
 import { useAuth } from "@/src/hooks/useAuth";
 import Image from "next/image";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMyNotifications, markAllNotificationsAsRead } from "@/src/services/notification.service";
+import { useQuery } from "@tanstack/react-query";
+import { getMyNotifications } from "@/src/services/notification.service";
 
 export default function Navbar() {
   const { user, isAuthenticated, isPending, logout } = useAuth();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const queryClient = useQueryClient();
 
   // Fetch unread notifications count
   const { data: notifData } = useQuery({
@@ -38,10 +37,11 @@ export default function Navbar() {
     }
   };
 
+  const dashboardLink = user?.role === "ADMIN" ? "/admin-dashboard" : "/dashboard";
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/events", label: "Events" },
-    { href: "/dashboard", label: "Dashboard" },
+    { href: dashboardLink, label: "Dashboard" },
   ];
 
   const isActive = (href: string) =>
@@ -74,12 +74,13 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <Image
-              src="/Planora.jpg"
-              alt="Planora Logo"
-              width={162}
+            <Image 
+              src="/Planora.jpg" 
+              alt="Planora Logo" 
+              width={162} 
               height={102}
-              className="w-auto h-auto"
+              loading="eager"
+              className="w-52 h-auto mx-auto p-5" 
             />
           </Link>
 
@@ -106,7 +107,7 @@ export default function Navbar() {
               <>
                 {/* Notifications */}
                 <Link
-                  href="/notifications"
+                  href="/dashboard/notifications"
                   className="relative w-9 h-9 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
                 >
                   <Bell className="w-4 h-4" />

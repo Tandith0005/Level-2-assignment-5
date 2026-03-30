@@ -11,20 +11,15 @@ import {
   INotification,
   deleteAllNotificationsAsRead,
 } from "@/src/services/notification.service";
-import { useAuth } from "@/src/hooks/useAuth";
-import { useRouter } from "next/navigation";
 import { formatDate } from "@/src/utils/formatDate";
 
 export default function NotificationsPage() {
-  const { isAuthenticated } = useAuth();
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
 
   const { data, isLoading } = useQuery({
     queryKey: ["notifications", page],
     queryFn: () => getMyNotifications(page, 10),
-    enabled: isAuthenticated,
   });
 
   const markReadMutation = useMutation({
@@ -54,17 +49,13 @@ export default function NotificationsPage() {
     onError: () => toast.error("Failed to delete notifications"),
   });
 
-  if (!isAuthenticated) {
-    router.push("/login");
-    return null;
-  }
 
   const notifications = data?.data ?? [];
   const meta = data?.meta;
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] to-[#050508] pt-28 pb-16">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] to-[#050508] pb-16">
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

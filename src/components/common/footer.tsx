@@ -10,12 +10,13 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4 group w-fit">
-              <Image
-                src="/Planora.jpg"
-                alt="Planora Logo"
-                width={162}
+              <Image 
+                src="/Planora.jpg" 
+                alt="Planora Logo" 
+                width={162} 
                 height={102}
-                className="w-auto h-auto"
+                loading="eager"
+                className="w-50 h-auto mx-auto"
               />
             </Link>
             <p className="text-zinc-500 text-sm leading-relaxed max-w-xs">

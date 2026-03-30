@@ -4,6 +4,7 @@ import UpcomingEventsSlider from "../components/homepage/upcomingEventSlider";
 import EventCategoriesSection from "../components/homepage/eventCategories";
 import CTASection from "../components/homepage/ctaSection";
 import Navbar from "../components/common/Navbar";
+import Footer from "../components/common/footer";
 
 export default function Home() {
   return (
@@ -13,6 +14,7 @@ export default function Home() {
       <UpcomingEventsSlider />
       <EventCategoriesSection />
       <CTASection />
+      <Footer />
     </div>
   );
 }

@@ -12,6 +12,12 @@ interface EventQueryParams {
   sortOrder?: 'asc' | 'desc';
 }
 
+
+export const createEvent = async (payload: any) => {
+  const res = await axiosInstance.post("/v1/events", payload);
+  return res.data;
+};
+
 export const getAllEvents = async (params?: EventQueryParams) => {
   try {
     const res = await axiosInstance.get("/v1/events", { params }); // Axios handles ?key=value automatically

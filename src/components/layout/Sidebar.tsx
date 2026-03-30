@@ -2,16 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  Users, 
-  Bell, 
-  User, 
-  LogOut, 
-  Plus 
+import {
+  LayoutDashboard,
+  Calendar,
+  Users,
+  Bell,
+  User,
+  LogOut,
+  Plus,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/src/hooks/useAuth";
+import Image from "next/image";
 
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -23,29 +25,45 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, logout, isPending } = useAuth();
 
   const isActive = (href: string) => pathname === href;
+
+  const adminLink = user?.role === "ADMIN" 
+    ? { href: "/admin-dashboard", label: "Admin Dashboard", icon: LayoutDashboard }
+    : null;
+
+  if (isPending) {
+    return (
+      <div className="min-h-screen pt-24 flex flex-col items-center justify-center">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-violet-500/20 border-t-violet-500 rounded-full animate-spin" />
+          <Sparkles className="w-6 h-6 text-violet-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+        </div>
+        <p className="text-violet-400 mt-4 animate-pulse">Loading amazing event details...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed left-0 top-0 bottom-0 w-72 bg-[#111118] border-r border-white/10 hidden lg:flex flex-col z-50">
       {/* Logo */}
-      <div className="p-6 border-b border-white/10">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
-            <span className="text-white font-bold text-xl">P</span>
-          </div>
-          <span className="text-white font-bold text-2xl tracking-tight">
-            Plan<span className="text-violet-400">ora</span>
-          </span>
-        </div>
-      </div>
+      <Link href="/" className="flex items-center gap-2 p-4">
+        <Image
+        src="/SidebarLogo.jpg"
+        alt="Planora Logo"
+        width={162}
+        height={102}
+        loading="eager"
+        className="w-52 h-auto mx-auto m-5"
+      />
+      </Link>
 
       {/* Navigation */}
       <div className="flex-1 p-4">
         <div className="mb-6 px-3">
           <Link
-            href="/dashboard/my-events"
+            href="/dashboard/my-events/create"
             className="flex items-center gap-3 px-4 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl font-medium transition-all shadow-lg shadow-violet-500/20"
           >
             <Plus className="w-5 h-5" />
@@ -71,6 +89,22 @@ export default function Sidebar() {
               </Link>
             );
           })}
+
+          {/* Dynamic Admin Dashboard Link */}
+          {user?.role === "ADMIN" && adminLink && (
+            <Link
+              href={adminLink.href}
+              className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all ${
+                isActive(adminLink.href)
+                  ? "bg-white/10 text-white"
+                  : "text-rose-400 hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              <adminLink.icon className="w-5 h-5" />
+              {adminLink.label}
+            </Link>
+          )}
+
         </nav>
       </div>
 
@@ -81,7 +115,9 @@ export default function Sidebar() {
             {user?.name?.charAt(0).toUpperCase() || "U"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-white font-medium truncate">{user?.name}</p>
+            <p className="text-sm text-white font-medium truncate">
+              {user?.name}
+            </p>
             <p className="text-xs text-zinc-500 truncate">{user?.email}</p>
           </div>
         </div>

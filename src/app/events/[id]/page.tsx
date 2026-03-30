@@ -41,7 +41,6 @@ export default function EventDetailsPage() {
 
   // "idle" | "joined" (pending payment) | "redirecting"
   const [paymentStep, setPaymentStep] = useState<"idle" | "joined" | "redirecting">("idle");
-  const [isLiked, setIsLiked] = useState(false);
 
   const eventId = params.id as string;
 
