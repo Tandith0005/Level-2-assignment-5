@@ -8,8 +8,13 @@ const axiosInstance = axios.create({
   withCredentials: false, // no longer needed
 });
 
-// Attach token to every request
+
 axiosInstance.interceptors.request.use((config) => {
+  // Don't attach accessToken to the refresh endpoint
+  if (config.url?.includes("/auth/refresh-token")) {
+    return config;
+  }
+  
   const token = tokenStore.getAccess();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -17,9 +22,9 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
+
 let isRefreshing = false;
 let failedQueue: any[] = [];
-
 const processQueue = (error: any) => {
   failedQueue.forEach((prom) => {
     if (error) prom.reject(error);
