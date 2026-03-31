@@ -9,6 +9,7 @@ import {
   LogOut,
   ShieldCheck,
   Flag,
+  DoorOpen,
 } from "lucide-react";
 import { useAuth } from "@/src/hooks/useAuth";
 import Image from "next/image";
@@ -78,6 +79,15 @@ export default function AdminSidebar() {
             Dashboard
           </Link>
         </div>
+
+        {/* Back to Home */}
+          <Link
+            href="/"
+            className="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-rose-400 hover:bg-rose-500/10 hover:text-white transition-all"
+          >
+            <DoorOpen className="w-5 h-5" />
+            Back to Home
+          </Link>
       </div>
 
       {/* User Footer */}
