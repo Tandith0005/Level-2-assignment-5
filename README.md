@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# 🎨 Planora Frontend
 
-First, run the development server:
+> **A modern, responsive, and type-safe user interface for the Planora Event Management Platform.**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Built with **Next.js 14+ (App Router)**, **TypeScript**, and **Tailwind CSS**, this frontend provides a seamless experience for discovering events, managing registrations, and handling secure payments via Stripe. It leverages **TanStack Query** for efficient data fetching and **Zod** + **React Hook Form** for robust form validation.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Live URLs
+- **Frontend**: https://level-2-assignment-5-637q.onrender.com
+- **Backend API**: https://level-2-assignment-5-server.onrender.com
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ✨ Key Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 🏠 Public Pages
+*   **Hero & Discovery:** Engaging homepage with featured events and category filtering.
+*   **Event Listing:** Advanced search, filtering (Public/Private, Free/Paid), and pagination.
+*   **Event Details:** Comprehensive event info with dynamic action buttons (Join, Pay, Request).
+*   **Auth Pages:** Secure Login, Register, and Email Verification flows with real-time validation.
 
-## Learn More
+### 🛡️ User Dashboard
+*   **Overview:** Personal stats and quick actions.
+*   **My Events:** Create, edit, and delete events. Manage participant lists (Approve/Reject/Ban).
+*   **Invitations:** Accept or decline private event invites.
+*   **Profile:** Update user details and view history.
+*   **Notifications:** Real-time updates on event status and invitations.
 
-To learn more about Next.js, take a look at the following resources:
+### 💳 Payment Integration
+*   **Stripe Checkout:** Seamless redirect to Stripe for paid events.
+*   **Payment Status:** Dedicated Success/Cancel pages with automatic cache invalidation.
+*   **Token Refresh:** Automatic JWT token rotation using Axios interceptors and LocalStorage fallback.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Category | Technologies |
+| :--- | :--- |
+| **Framework** | Next.js 14+ (App Router), React 19 |
+| **Language** | TypeScript |
+| **Styling** | Tailwind CSS, Lucide React Icons |
+| **State & Data** | TanStack Query (React Query), Axios |
+| **Forms** | React Hook Form, Zod |
+| **Auth** | JWT (LocalStorage + HttpOnly Cookie hybrid) |
+| **Payments** | Stripe Checkout (Client-side redirect) |
+| **Deployment** | Render (Web Service) |
 
-## Deploy on Vercel
+## 🚀 Getting Started
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Prerequisites
+*   Node.js 18+
+*   Backend API running (see [Backend Repo](#))
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Installation
+
+1.  **Clone the repo:**
+    ```bash
+    git clone https://github.com/Tandith0005/Level-2-assignment-5-frontend.git
+    cd Level-2-assignment-5-frontend
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Configure Environment Variables:**
+    Create a `.env.local` file in the root:
+    ```env
+    NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+    NEXT_PUBLIC_FRONTEND_URL=http://localhost:3000
+    ```
+
+4.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+    Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 📂 Project Structure
+
+```text
+src/
+├── app/                   
+│   ├── (auth)/           
+│   ├── (dashboard)/      
+│   ├── events/           
+│   └── layout.tsx        
+├── components/           
+│   ├── common/           
+│   ├── event/            
+│   ├── homepage/         
+│   └── layout/        
+├── hooks/                 
+├── lib/             
+├── services/             
+├── types/               
+├── providers/               
+└── proxy.ts   
+```         
+
+## 🎨 Design System
+- Theme: Dark mode default (#0a0a0f background) with Violet/Indigo accents.
+- Responsiveness: Mobile-first design using Tailwind breakpoints.
+- Feedback: Toast notifications via react-hot-toast for all user actions.
