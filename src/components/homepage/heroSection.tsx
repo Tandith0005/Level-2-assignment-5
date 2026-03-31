@@ -6,24 +6,11 @@ import { useQuery } from "@tanstack/react-query";
 
 import { Calendar, MapPin, ArrowRight, Sparkles, Users } from "lucide-react";
 import { formatDate, formatFee } from "@/src/utils/formatDate";
-import { dummyFeaturedEvent } from "./dummyEvents";
+import { FeaturedEvent } from "./featuredEvents";
 
 export default function HeroSection() {
-  // Fetch the most recent upcoming public event as "featured"
-//   const { data, isLoading } = useQuery({
-//     queryKey: ["featured-event"],
-//     queryFn: () =>
-//       eventService.getAll({
-//         type: "PUBLIC",
-//         sortBy: "date",
-//         sortOrder: "asc",
-//         limit: 1,
-//         page: 1,
-//       }),
-//   });
 
-//   const featured = data?.data?.[0];
-  const featured = dummyFeaturedEvent;
+  const featured = FeaturedEvent;
   const isLoading = false
 
   return (
