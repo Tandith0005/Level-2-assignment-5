@@ -164,16 +164,63 @@ export default function EventDetailsPage() {
         action: null,
       };
     }
-    // Highest priority: Has pending payment → allow retry
-  if (hasPendingPayment) {
-    return {
-      label: "Complete Payment",
-      disabled: false,
-      type: "primary" as const,
-      icon: CreditCard,
-      action: "completePayment" as const,
-    };
-  }
+
+    const myParticipant = eventData?.participants?.find(
+      (p: any) => p.userId === user?.id,
+    );
+    if (myParticipant) {
+      if (myParticipant.status === "BANNED") {
+        return {
+          label: "You've Been Banned",
+          disabled: true,
+          type: "neutral",
+          icon: Lock,
+          action: null,
+        };
+      }
+      if (myParticipant.status === "REJECTED") {
+        return {
+          label: "Request Rejected",
+          disabled: true,
+          type: "neutral",
+          icon: Lock,
+          action: null,
+        };
+      }
+      if (myParticipant.status === "APPROVED") {
+        return {
+          label: "You're Going! ✓",
+          disabled: true,
+          type: "success",
+          icon: CheckCircle,
+          action: null,
+        };
+      }
+      // PENDING + not paid = needs payment
+      if (
+        myParticipant.status === "PENDING" &&
+        !myParticipant.isPaid &&
+        eventData.registrationFee > 0
+      ) {
+        return {
+          label: "Complete Payment",
+          disabled: false,
+          type: "primary" as const,
+          icon: CreditCard,
+          action: "completePayment" as const,
+        };
+      }
+      // PENDING + paid or free = waiting for approval
+      if (myParticipant.status === "PENDING") {
+        return {
+          label: "Awaiting Approval",
+          disabled: true,
+          type: "neutral",
+          icon: Clock,
+          action: null,
+        };
+      }
+    }
     if (eventData.type === "PRIVATE") {
       return {
         label: "Invitation Only",
@@ -183,7 +230,7 @@ export default function EventDetailsPage() {
         action: null,
       };
     }
-    
+
     if (eventData.registrationFee > 0) {
       return {
         label: `Pay $${eventData.registrationFee} & Join`,
