@@ -14,56 +14,6 @@ type AuthState = {
   logout: () => Promise<void>;
 };
 
-// export const useAuth = (): AuthState => {
-//   const [user, setUser] = useState<User | null>(null);
-//   const [isLoading, setIsLoading] = useState(true);
-//     const router = useRouter();
-
-//   // Check if user is logged in on mount
-//   useEffect(() => {
-//     const checkAuth = async () => {
-//       setIsLoading(true);
-
-//       try {
-//         const res = await axiosInstance.get("/auth/me");
-//         const userData = res.data?.data || res.data;
-//         setUser(userData);
-//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//       } catch (error: any) {
-
-//         setUser(null);
-//       } finally {
-//         setIsLoading(false);
-//       }
-//     };
-
-//     checkAuth();
-//   }, []);
-
-//   const login = (userData: User) => {
-//     setUser(userData);
-//     router.push("/");
-//   };
-
-//   const logout = async () => {
-//     try {
-//       await axiosInstance.post("/auth/logout");
-//     } catch (error) {
-//       console.error("Logout error:", error);
-//     } finally {
-//       setUser(null);
-//       router.push("/");
-//     }
-//   };
-
-//   return {
-//     user,
-//     isLoading,
-//     isAuthenticated: !!user,
-//     login,
-//     logout,
-//   };
-// };
 
 export const useAuth = () => {
   const router = useRouter();
