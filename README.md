@@ -6,6 +6,7 @@
 Built with **Next.js 14+ (App Router)**, **TypeScript**, and **Tailwind CSS**, this frontend provides a seamless experience for discovering events, managing registrations, and handling secure payments via Stripe. It leverages **TanStack Query** for efficient data fetching and **Zod** + **React Hook Form** for robust form validation.
 
 ## Live URLs
+- **Github Backend** : https://github.com/Tandith0005/Planora-Server
 - **Frontend**: https://level-2-assignment-5-637q.onrender.com
 - **Backend API**: https://level-2-assignment-5-server.onrender.com
 
