@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { formatDate, formatFee } from "@/src/utils/formatDate";
 import { getAllEvents } from "@/src/services/event.service";
+import { useUpcomingEventsSliderAnimation } from "@/src/hooks/animations/useUpcomingEventSliderAnimation";
+
 
 function SliderCard({ event }: { event: any }) {
   const isPaid = event.registrationFee > 0;
@@ -21,7 +23,7 @@ function SliderCard({ event }: { event: any }) {
   return (
     <Link
       href={`/events/${event.id}`}
-      className="group flex-shrink-0 w-72 bg-[#111118] border border-white/5 rounded-2xl overflow-hidden hover:border-violet-500/30 hover:-translate-y-1 hover:shadow-2xl hover:shadow-violet-500/10 transition-all duration-300 flex flex-col"
+      className="group flex-shrink-0 w-72 bg-[#111118] border border-white/5 rounded-2xl overflow-hidden hover:border-violet-500/30 hover:-translate-y-1 hover:shadow-2xl hover:shadow-violet-500/10 transition-all duration-300 flex flex-col slider-card"
     >
       {/* Colour accent top */}
       <div
@@ -89,6 +91,9 @@ function SkeletonCard() {
 
 export default function UpcomingEventsSlider() {
   const sliderRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);   // Main trigger element
 
   const { data, isLoading } = useQuery({
     queryKey: ["upcoming-events-slider"],
@@ -104,6 +109,15 @@ export default function UpcomingEventsSlider() {
 
   const events = data?.data?.data || [];
 
+// GSAP animations
+ useUpcomingEventsSliderAnimation({
+  sectionRef,
+  headerRef,
+  containerRef,
+  eventsLength: events.length,
+  isLoading,
+});
+
   const scroll = (dir: "left" | "right") => {
     const el = sliderRef.current;
     if (!el) return;
@@ -111,7 +125,8 @@ export default function UpcomingEventsSlider() {
   };
 
   return (
-    <section className="py-24 bg-[#0a0a0f] relative overflow-hidden">
+    <section ref={sectionRef} className="py-24 bg-[#0a0a0f] relative overflow-hidden">
+      {/* Ambient background glows */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full bg-violet-600/10 blur-[120px]" />
         <div className="absolute -bottom-40 -right-40 w-[700px] h-[700px] rounded-full bg-violet-600/10 blur-[120px]" />
@@ -119,7 +134,7 @@ export default function UpcomingEventsSlider() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-end justify-between mb-10">
+        <div ref={headerRef} className="flex items-end justify-between mb-10">
           <div>
             <p className="text-violet-400 text-xs font-semibold uppercase tracking-widest mb-2">
               Coming Up
@@ -149,25 +164,27 @@ export default function UpcomingEventsSlider() {
           </div>
         </div>
 
-        {/* Slider */}
-        <div
-          ref={sliderRef}
-          className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          {isLoading ? (
-            Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-          ) : events.length > 0 ? (
-            events.map((event: any) => (
-              <div key={event.id} className="snap-start">
-                <SliderCard event={event} />
+        {/* Slider Container */}
+        <div ref={containerRef}>
+          <div
+            ref={sliderRef}
+            className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {isLoading ? (
+              Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+            ) : events.length > 0 ? (
+              events.map((event: any) => (
+                <div key={event.id} className="snap-start">
+                  <SliderCard event={event} />
+                </div>
+              ))
+            ) : (
+              <div className="flex-1 flex items-center justify-center py-20 text-zinc-600 text-sm">
+                No upcoming public events yet.
               </div>
-            ))
-          ) : (
-            <div className="flex-1 flex items-center justify-center py-20 text-zinc-600 text-sm">
-              No upcoming public events yet.
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* View all link */}

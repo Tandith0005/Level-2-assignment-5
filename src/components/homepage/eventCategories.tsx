@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Globe, Lock, Tag, Ticket, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { getAllEvents } from "@/src/services/event.service";
 import { Event } from "@/src/types";
 import EventCard from "../event/EventCard";
+import { useEventCategoriesAnimation } from "@/src/hooks/animations/useEventCategoriesAnimation";
 
 type CategoryKey =
   | "public-free"
@@ -98,6 +99,11 @@ function CategoryTab({
 export default function EventCategoriesSection() {
   const [activeKey, setActiveKey] = useState<CategoryKey>("public-free");
   const activeCategory = CATEGORIES.find((c) => c.key === activeKey)!;
+  const sectionRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const descriptorRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["category-events", activeKey],
@@ -115,8 +121,23 @@ export default function EventCategoriesSection() {
   const events = data?.data?.data || [];
   const total = data?.meta?.total || 0;
 
+  // Animation hook
+  useEventCategoriesAnimation({
+    sectionRef,
+    headerRef,
+    tabsRef,
+    descriptorRef,
+    gridRef,
+    isLoading,
+    eventsLength: events.length,
+    activeKey,
+  });
+
   return (
-    <section className="py-24 bg-[#07070e] relative overflow-hidden">
+    <section
+      ref={sectionRef}
+      className="py-24 bg-[#07070e] relative overflow-hidden"
+    >
       {/* Background gradient */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full bg-violet-600/10 blur-[120px]" />
@@ -131,7 +152,7 @@ export default function EventCategoriesSection() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-10">
+        <div ref={headerRef} className="mb-10">
           <p className="text-violet-400 text-xs font-semibold uppercase tracking-widest mb-2">
             Browse by Type
           </p>
@@ -150,7 +171,7 @@ export default function EventCategoriesSection() {
         </div>
 
         {/* Category tabs */}
-        <div className="flex flex-wrap gap-2 mb-10">
+        <div ref={tabsRef} className="flex flex-wrap gap-2 mb-10">
           {CATEGORIES.map((cat) => (
             <CategoryTab
               key={cat.key}
@@ -163,6 +184,7 @@ export default function EventCategoriesSection() {
 
         {/* Active category descriptor */}
         <div
+          ref={descriptorRef}
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl ${activeCategory.color} border ${activeCategory.borderColor} mb-8`}
         >
           <activeCategory.icon
@@ -179,45 +201,49 @@ export default function EventCategoriesSection() {
         </div>
 
         {/* Events grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="bg-[#111118] border border-white/5 rounded-2xl p-5 animate-pulse h-64"
-              >
-                <div className="h-3 bg-white/5 rounded w-1/3 mb-4" />
-                <div className="h-5 bg-white/5 rounded w-full mb-2" />
-                <div className="h-5 bg-white/5 rounded w-3/4 mb-4" />
-                <div className="h-3 bg-white/5 rounded w-1/2 mb-2" />
-                <div className="h-3 bg-white/5 rounded w-2/5" />
-              </div>
-            ))}
-          </div>
-        ) : events.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {events.map((event: Event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div
-              className={`w-14 h-14 rounded-2xl ${activeCategory.color} border ${activeCategory.borderColor} flex items-center justify-center mb-4`}
-            >
-              <activeCategory.icon
-                className={`w-6 h-6 ${activeCategory.iconColor}`}
-              />
+        <div ref={gridRef}>
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-[#111118] border border-white/5 rounded-2xl p-5 animate-pulse h-64"
+                >
+                  <div className="h-3 bg-white/5 rounded w-1/3 mb-4" />
+                  <div className="h-5 bg-white/5 rounded w-full mb-2" />
+                  <div className="h-5 bg-white/5 rounded w-3/4 mb-4" />
+                  <div className="h-3 bg-white/5 rounded w-1/2 mb-2" />
+                  <div className="h-3 bg-white/5 rounded w-2/5" />
+                </div>
+              ))}
             </div>
-            <p className="text-white font-semibold mb-1">
-              No events in this category
-            </p>
-            <p className="text-zinc-600 text-sm">
-              Be the first to create a {activeCategory.label.toLowerCase()}{" "}
-              event.
-            </p>
-          </div>
-        )}
+          ) : events.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {events.map((event: Event) => (
+                <div key={event.id} className="event-card">
+                  <EventCard event={event} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div
+                className={`w-14 h-14 rounded-2xl ${activeCategory.color} border ${activeCategory.borderColor} flex items-center justify-center mb-4`}
+              >
+                <activeCategory.icon
+                  className={`w-6 h-6 ${activeCategory.iconColor}`}
+                />
+              </div>
+              <p className="text-white font-semibold mb-1">
+                No events in this category
+              </p>
+              <p className="text-zinc-600 text-sm">
+                Be the first to create a {activeCategory.label.toLowerCase()}{" "}
+                event.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
