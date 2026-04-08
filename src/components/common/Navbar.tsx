@@ -4,7 +4,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X, Bell, LogOut, LayoutDashboard, ChevronDown, Loader2 } from "lucide-react";
+import {
+  Menu,
+  X,
+  Bell,
+  LogOut,
+  LayoutDashboard,
+  ChevronDown,
+  Loader2,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/src/hooks/useAuth";
 import Image from "next/image";
@@ -22,11 +30,12 @@ export default function Navbar() {
     queryKey: ["notifications-count"],
     queryFn: () => getMyNotifications(1, 10),
     enabled: isAuthenticated,
-    refetchInterval: 30000,        // Refresh every 30 seconds
+    refetchInterval: 30000, // Refresh every 30 seconds
     staleTime: 10000,
   });
 
-  const unreadCount = notifData?.data?.filter((n: any) => !n.isRead).length ?? 0;
+  const unreadCount =
+    notifData?.data?.filter((n: any) => !n.isRead).length ?? 0;
 
   const handleLogout = async () => {
     try {
@@ -37,7 +46,8 @@ export default function Navbar() {
     }
   };
 
-  const dashboardLink = user?.role === "ADMIN" ? "/admin-dashboard" : "/dashboard";
+  const dashboardLink =
+    user?.role === "ADMIN" ? "/admin-dashboard" : "/dashboard";
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/events", label: "Events" },
@@ -54,10 +64,10 @@ export default function Navbar() {
         <div className="container mx-auto px-4 h-full flex items-center justify-between">
           {/* Logo Placeholder */}
           <div className="flex items-center gap-2">
-             <div className="w-10 h-10 rounded-lg bg-white/5 animate-pulse" />
-             <div className="h-4 w-24 bg-white/5 rounded animate-pulse" />
+            <div className="w-10 h-10 rounded-lg bg-white/5 animate-pulse" />
+            <div className="h-4 w-24 bg-white/5 rounded animate-pulse" />
           </div>
-          
+
           {/* Loading Spinner */}
           <div className="flex items-center gap-2 text-zinc-400">
             <span className="text-sm">Loading...</span>
@@ -74,13 +84,13 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <Image 
-              src="/Planora.jpg" 
-              alt="Planora Logo" 
-              width={162} 
+            <Image
+              src="/Planora.jpg"
+              alt="Planora Logo"
+              width={162}
               height={102}
               loading="eager"
-              className="w-52 h-auto mx-auto p-5" 
+              className="w-52 h-auto mx-auto p-5"
             />
           </Link>
 
@@ -130,16 +140,23 @@ export default function Navbar() {
                     <span className="text-sm text-zinc-300 group-hover:text-white transition-colors max-w-[100px] truncate">
                       {user.name || "User"}
                     </span>
-                    <ChevronDown className={`w-3 h-3 text-zinc-500 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown
+                      className={`w-3 h-3 text-zinc-500 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
+                    />
                   </button>
 
                   {dropdownOpen && (
                     <>
-                      <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={() => setDropdownOpen(false)}
+                      />
                       <div className="absolute right-0 top-full mt-2 w-48 bg-[#111118] border border-white/10 rounded-xl shadow-xl shadow-black/50 z-20 overflow-hidden">
                         <div className="px-4 py-3 border-b border-white/5">
                           <p className="text-xs text-zinc-500">Signed in as</p>
-                          <p className="text-sm text-white font-medium truncate">{user.email}</p>
+                          <p className="text-sm text-white font-medium truncate">
+                            {user.email}
+                          </p>
                           {user.role === "ADMIN" && (
                             <span className="inline-block mt-1 text-[10px] px-2 py-0.5 bg-violet-500/20 text-violet-400 rounded-full font-medium">
                               Admin
@@ -155,7 +172,10 @@ export default function Navbar() {
                           Dashboard
                         </Link>
                         <button
-                          onClick={() => { handleLogout(); setDropdownOpen(false); }}
+                          onClick={() => {
+                            handleLogout();
+                            setDropdownOpen(false);
+                          }}
                           className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-zinc-400 hover:text-red-400 hover:bg-red-500/5 transition-all"
                         >
                           <LogOut className="w-4 h-4" />
@@ -189,7 +209,11 @@ export default function Navbar() {
             className="md:hidden w-9 h-9 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
           </button>
         </div>
       </div>
@@ -225,7 +249,10 @@ export default function Navbar() {
                 Dashboard
               </Link>
               <button
-                onClick={() => { handleLogout(); setMobileOpen(false); }}
+                onClick={() => {
+                  handleLogout();
+                  setMobileOpen(false);
+                }}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-red-400 hover:bg-red-500/5 transition-all"
               >
                 <LogOut className="w-4 h-4" />

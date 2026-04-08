@@ -161,7 +161,7 @@ export default function ReviewSection({
     count: reviews.filter((r) => r.rating === star).length,
     pct: total > 0 ? (reviews.filter((r) => r.rating === star).length / total) * 100 : 0,
   }));
-console.log("ReviewSection render:", { eventId, rating, comment, isParticipant });
+
   return (
     <section className="mt-8 px-6 sm:px-8 pb-8">
       {/* ── Section header ── */}

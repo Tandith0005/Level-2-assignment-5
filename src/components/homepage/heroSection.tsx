@@ -6,13 +6,20 @@ import { Calendar, MapPin, ArrowRight, Sparkles, Users } from "lucide-react";
 import { formatDate, formatFee } from "@/src/utils/formatDate";
 import { FeaturedEvent } from "./featuredEvents";
 
-export default function HeroSection() {
+import { useRef } from "react";
+import { useHeroAnimation } from "@/src/hooks/animations/useHeroAnimation";
 
+export default function HeroSection() {
   const featured = FeaturedEvent;
-  const isLoading = false
+  const isLoading = false;
+  const container = useRef<HTMLElement | null>(null);
+  
+
+  useHeroAnimation(container);
+  
 
   return (
-    <section className="relative min-h-[92vh] flex items-center overflow-hidden bg-[#07070e]">
+    <section ref={container} className="relative min-h-[92vh] flex items-center overflow-hidden bg-[#07070e]">
       {/* ── Ambient background ── */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Radial glow top-left */}
@@ -50,19 +57,19 @@ export default function HeroSection() {
               </div>
             ) : featured ? (
               <>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-[1.05] tracking-tight mb-6">
+                <h1 className="hero-title text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-[1.05] tracking-tight mb-6">
                   {featured.title.split(" ").slice(0, 4).join(" ")}
                   <span className="block text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-indigo-400">
                     {featured.title.split(" ").slice(4).join(" ") || ""}
                   </span>
                 </h1>
 
-                <p className="text-zinc-400 text-lg leading-relaxed mb-8 max-w-lg">
+                <p className="hero-subtitle text-zinc-400 text-lg leading-relaxed mb-8 max-w-lg">
                   {featured.description.slice(0, 160)}
                   {featured.description.length > 160 ? "…" : ""}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-5 mb-10">
+                <div className="hero-date flex flex-wrap items-center gap-5 mb-10">
                   <div className="flex items-center gap-2 text-sm text-zinc-500">
                     <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center">
                       <Calendar className="w-3.5 h-3.5 text-violet-400" />
@@ -83,7 +90,7 @@ export default function HeroSection() {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="hero-cta flex flex-wrap items-center gap-3">
                   <Link
                     href={`/events/${featured.id}`}
                     className="group inline-flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:-translate-y-0.5"
@@ -109,7 +116,8 @@ export default function HeroSection() {
                   You Love
                 </h1>
                 <p className="text-zinc-400 text-lg leading-relaxed mb-8 max-w-lg">
-                  From intimate private gatherings to massive public conferences — create, manage and participate in events that matter.
+                  From intimate private gatherings to massive public conferences
+                  — create, manage and participate in events that matter.
                 </p>
                 <div className="flex flex-wrap items-center gap-3">
                   <Link
@@ -131,7 +139,7 @@ export default function HeroSection() {
           </div>
 
           {/* ── Right: Featured card ── */}
-          <div className="relative hidden lg:block">
+          <div className="hero-card relative hidden lg:block">
             {/* Glow behind card */}
             <div className="absolute inset-0 bg-gradient-to-br from-violet-600/20 to-indigo-600/10 rounded-3xl blur-2xl scale-95" />
 
@@ -166,15 +174,24 @@ export default function HeroSection() {
                   {/* Stats row */}
                   <div className="grid grid-cols-2 gap-3 mb-6">
                     {[
-                      { label: "Date", value: formatDate(featured.date), icon: Calendar },
+                      {
+                        label: "Date",
+                        value: formatDate(featured.date),
+                        icon: Calendar,
+                      },
                       { label: "Venue", value: featured.venue, icon: MapPin },
                     ].map(({ label, value, icon: Icon }) => (
-                      <div key={label} className="bg-white/3 rounded-xl p-3 border border-white/5">
+                      <div
+                        key={label}
+                        className="bg-white/3 rounded-xl p-3 border border-white/5"
+                      >
                         <div className="flex items-center gap-1.5 text-zinc-600 text-xs mb-1">
                           <Icon className="w-3 h-3" />
                           {label}
                         </div>
-                        <p className="text-white text-sm font-medium truncate">{value}</p>
+                        <p className="text-white text-sm font-medium truncate">
+                          {value}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -186,7 +203,9 @@ export default function HeroSection() {
                     </div>
                     <div>
                       <p className="text-xs text-zinc-600">Organized by</p>
-                      <p className="text-sm text-zinc-300 font-medium">{featured.creator?.name}</p>
+                      <p className="text-sm text-zinc-300 font-medium">
+                        {featured.creator?.name}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -197,16 +216,20 @@ export default function HeroSection() {
                 <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mx-auto mb-4">
                   <Calendar className="w-8 h-8 text-violet-400" />
                 </div>
-                <p className="text-white font-semibold mb-2">No featured event yet</p>
-                <p className="text-zinc-600 text-sm">Be the first to create an event on Planora.</p>
+                <p className="text-white font-semibold mb-2">
+                  No featured event yet
+                </p>
+                <p className="text-zinc-600 text-sm">
+                  Be the first to create an event on Planora.
+                </p>
               </div>
             )}
 
             {/* Floating decoration badges */}
-            <div className="absolute -top-4 -right-4 px-3 py-1.5 bg-[#111118] border border-white/10 rounded-full text-xs text-zinc-400 shadow-xl">
+            <div className="hero-badge absolute -top-4 -right-4 px-3 py-1.5 bg-[#111118] border border-white/10 rounded-full text-xs text-zinc-400 shadow-xl">
               🔴 Live Now
             </div>
-            <div className="absolute -bottom-4 -left-4 px-3 py-1.5 bg-[#111118] border border-white/10 rounded-full text-xs text-zinc-400 shadow-xl">
+            <div className="hero-badge absolute -bottom-4 -left-4 px-3 py-1.5 bg-[#111118] border border-white/10 rounded-full text-xs text-zinc-400 shadow-xl">
               ✦ Featured Pick
             </div>
           </div>
